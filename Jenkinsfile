@@ -18,31 +18,32 @@ pipeline {
         stage('Deploy to EC2') {
             steps {
                 sshagent(credentials: ['ec2-ssh-key']) {
+
                     sh '''
-                    ssh -o StrictHostKeyChecking=no ${USER}@${HOST} << EOF
+                    ssh -o StrictHostKeyChecking=no ${USER}@${HOST} "
 
                     set -e
 
-                    cd /home/ubuntu/student-management-fullstack
+                    cd ${APP_DIR}
 
-                    echo "Pulling latest code..."
+                    echo 'Pulling latest code...'
                     git pull origin main
 
-                    echo "Installing backend dependencies..."
+                    echo 'Installing backend dependencies...'
                     cd backend
                     npm install
 
-                    echo "Restarting backend..."
+                    echo 'Restarting backend...'
                     pm2 restart student-backend || pm2 start app.js --name student-backend
                     pm2 save
 
-                    echo "Deploying frontend..."
+                    echo 'Deploying frontend...'
                     sudo rm -rf /var/www/html/*
-                    sudo cp -r /home/ubuntu/student-management-fullstack/frontend/* /var/www/html/
+                    sudo cp -r ${APP_DIR}/frontend/* /var/www/html/
 
-                    echo "Deployment completed."
+                    echo 'Deployment completed successfully.'
 
-                    EOF
+                    "
                     '''
                 }
             }
@@ -50,12 +51,14 @@ pipeline {
     }
 
     post {
+
         success {
-            echo "Application deployed successfully!"
+            echo 'Application deployed successfully!'
         }
 
         failure {
-            echo "Deployment failed."
+            echo 'Deployment failed.'
         }
+
     }
 }
