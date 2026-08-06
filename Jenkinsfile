@@ -19,7 +19,7 @@ pipeline {
             steps {
                 sshagent(credentials: ['ec2-ssh-key']) {
                     sh '''
-                    ssh -o StrictHostKeyChecking=no ${USER}@${HOST} << 'EOF'
+                    ssh -o StrictHostKeyChecking=no ${USER}@${HOST} "
 
                     set -e
 
